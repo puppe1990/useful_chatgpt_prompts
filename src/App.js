@@ -1,136 +1,109 @@
 import React, { useState } from 'react';
-import { Button, Container, Row, Col, InputGroup, FormControl } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { FaCopy } from 'react-icons/fa';
 
-const categories = [
-  'All',
-  'Resume',
-  'Copywriting',
-  'Role Playing',
-  'Programming',
-  'Useful Prompts',
-  'Daily Life',
-  'Marketing',
-  'Writing',
-  'Learning New Things',
-  'Language Learning'
-];
-
-const categoryPrompts = {
-  'All': [
-    'What are some tips for staying productive?',
-    'What is your favorite book and why?',
-    'What are some good conversation starters for meeting new people?'
-  ],
-  'Resume': [
-    'What are some key skills to include on a resume?',
-    'How do you highlight your accomplishments on a resume?',
-    'What is the best way to format a resume?'
-  ],
-  'Copywriting': [
-    'How do you write a compelling headline?',
-    'What are some techniques for improving your writing?',
-    'What is the importance of storytelling in copywriting?'
-  ],
-  'Role Playing': [
-    'What are some tips for creating a believable character?',
-    'How do you create a compelling story for a role-playing game?',
-    'What is the best way to handle conflicts between players in a role-playing game?'
-  ],
-  'Programming': [
-    'What are some essential programming concepts every developer should know?',
-    'What are some common coding mistakes to avoid?',
-    'How do you debug code effectively?'
-  ],
-  'Useful Prompts': [
-    'What are some tips for dealing with stress?',
-    'How do you overcome writer\'s block?',
-    'What are some good ways to network professionally?'
-  ],
-  'Daily Life': [
-    'What are some tips for staying organized?',
-    'How do you develop healthy habits?',
-    'What are some good ways to unwind after a long day?'
-  ],
-  'Marketing': [
-    'What are some effective marketing strategies for a new product?',
-    'How do you create a successful social media campaign?',
-    'What is the importance of market research in marketing?'
-  ],
-  'Writing': [
-    'How do you write a great story?',
-    'What are some tips for improving your writing style?',
-    'What is the best way to edit your own writing?'
-  ],
-  'Learning New Things': [
-    'What are some effective ways to learn a new skill?',
-    'How do you overcome the fear of failure when learning something new?',
-    'What is the importance of practice when learning a new skill?'
-  ],
-  'Language Learning': [
-    'What are some effective ways to learn a new language?',
-    'How do you stay motivated when learning a new language?',
-    'What are some good ways to practice speaking a new language?'
-  ]
-};
+import { prompts } from './promptsData';
 
 const Prompts = () => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredPrompts = categoryPrompts[selectedCategory].filter(prompt =>
-    prompt.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleCategorySelect = category => {
-    setSelectedCategory(category);
-    setSearchTerm('');
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value);
   };
 
-  const handlePromptCopy = prompt => {
-    navigator.clipboard.writeText(prompt);
+  const filteredPrompts = prompts.filter((prompt) =>
+    prompt.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const promptCategories = [
+    'All',
+    'Resume',
+    'Copywriting',
+    'Role Playing',
+    'Programming',
+    'Useful Prompts',
+    'Daily Life',
+    'Marketing',
+    'Writing',
+    'Learning New Things',
+    'Language Learning',
+  ];
+
+  const [activeCategory, setActiveCategory] = useState(promptCategories[0]);
+
+  const handleCategoryClick = (category) => {
+    setActiveCategory(category);
   };
 
   return (
-    <Container>
-      <h1 className="my-4 ">CHATGPT Prompts</h1>
-      <Row>
-        <Col xs={12} md={4}>
-          <h2>Categories</h2>
-          {categories.map(category => (
-            <Button
-              key={category}
-              variant={category === selectedCategory ? 'primary' : 'secondary'}
-              onClick={() => handleCategorySelect(category)}
-              className="mr-2 my-1"
-            >
-              {category}
-            </Button>
-          ))}
-        </Col>
-        <Col xs={12} md={8}>
-          <h2>Prompts</h2>
-          <InputGroup className="mb-3">
-            <FormControl
-              placeholder="Search for prompts..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </InputGroup>
-          {filteredPrompts.length === 0 && (
-            <p>No prompts found for this category.</p>
+    <div className="container my-4">
+      <h1 className="text-center mb-4">CHATGPT Prompts</h1>
+      <div className="row mb-4">
+        <div className="col-12 col-md-6 mb-2 mb-md-0">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search for prompts..."
+            value={searchTerm}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="col-12 col-md-6 d-flex justify-content-end">
+          {filteredPrompts.length > 0 && (
+            <p className="m-0">Showing {filteredPrompts.length} results</p>
           )}
-          {filteredPrompts.map(prompt => (
-            <div key={prompt} className="mb-3">
-              <p>{prompt}</p>
-              <Button variant="secondary" onClick={() => handlePromptCopy(prompt)}>
-                Copy
-              </Button>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-12 col-md-3 mb-3">
+          <div className="list-group">
+            {promptCategories.map((category) => (
+              <button
+                key={category}
+                className={`list-group-item list-group-item-action ${
+                  activeCategory === category ? 'active' : ''
+                }`}
+                onClick={() => handleCategoryClick(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="col-12 col-md-9">
+          {filteredPrompts.length > 0 ? (
+            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+              {filteredPrompts
+                .filter((prompt) =>
+                  activeCategory === 'All'
+                    ? true
+                    : prompt.category === activeCategory
+                )
+                .map((prompt) => (
+                  <div key={prompt.id} className="col">
+                    <div className="card h-100">
+                      <div className="card-body">
+                        <h5 className="card-title">{prompt.title}</h5>
+                        <p className="card-text">{prompt.description}</p>
+                      </div>
+                      <div className="card-footer d-flex justify-content-end">
+                        <CopyToClipboard text={prompt.description}>
+                          <button className="btn btn-outline-secondary">
+                            <FaCopy />
+                          </button>
+                        </CopyToClipboard>
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
-          ))}
-        </Col>
-      </Row>
-    </Container>
+          ) : (
+            <p>No prompts found.</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
